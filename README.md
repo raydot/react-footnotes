@@ -1,3 +1,36 @@
+# react-footnotes
+
+React sequential footnotes numberer. Add tags and get auto-numbered footnotes as a result.
+
+Inspired by [react-ally-footnotes](https://github.com/KittyGiraudel/react-a11y-footnotes) by Kitty Giraudel(https://github.com/KittyGiraudel)
+
+I figured I had to use the `useMemo` or `useCallback` hooks, the results of which can be found in `use-memo-tutorial` or `useCallback.js`, respectively.
+
+Then it hit on me to use ChatGPT!
+
+```javascript
+// This was the first result, which creates a number that
+// continually increases.  Close!
+
+/** CHAT GPT QUERY
+ * I am a web developer.  How can I create a react component that can be used as a tag that renders an increasing number every time it's used on a page.
+ */
+
+//    const [count, setCount] = useState(0)
+
+// const increment = () => setCount(c => c + 1)
+
+// return (
+//     <CounterContext.Provider value={{ count, increment }}>
+//         {children}
+//     </CounterContext.Provider>
+// )
+```
+
+## Second iteration also created number that continually increases, but in footnote format. See `footnoteContext.js` and `footnoteComponent.js`
+
+## Next boilerplate follows:
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
