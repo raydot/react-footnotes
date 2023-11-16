@@ -1,0 +1,131 @@
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+} from 'react';
+
+const FootnotesContext = createContext({});
+
+export const FootnoteRef = (props) => {
+  const { description } = props;
+  const {
+    footnotes,
+    footnotesTitleId,
+    getFootnoteRefId,
+    getFootnoteId,
+    register,
+  } = useContext(FootnotesContext);
+
+  const idRef = useMemo(
+    () => getFootnoteRefId(props),
+    [getFootnoteRefId, props]
+  );
+
+  const idNote = useMemo(
+    () => getFootnoteId(props),
+    [getFootnoteId, props]
+  );
+
+  const footnote = useMemo(
+    () => ({ idRef, idNote, description }),
+    [idRef, idNote, description]
+  );
+
+  // Mutate state direction so it works with SSR
+  if (!footnotes.has(footnote.idRef)) {
+    footnotes.set(footnote.idRef, footnote);
+  }
+
+  // Once the app mounts the footnote state has been emptied
+  // So we can register, and set it up to unregister
+  useEffect(() => {
+    const unregister = register(footnote);
+
+    return () => unregister(), [register, footnote];
+  });
+
+  // return a footnote!
+  return (
+    <a
+      className={props.className}
+      style={props.style}
+      id={idRef}
+      href={`#${idNote}`}
+      role='doc-noteref'
+      aria-describedby={foototesTitleId}
+      data-a11y-footnotes-ref
+    >
+      {props.children}
+    </a>
+  )
+}
+
+export const Footnotes = props => {
+    const {footnotes, footnotesTitleId } = useContext(FootnotesContext)
+    const {Wrapper, Title, List, ListItem, BackLink} = props
+
+    if (footnotes.size === 0) return null
+
+    const references = Array.from(footnotes.values())
+
+    return (
+        Wrapper data-ally
+    )
+}
+
+export const FootnotesProvider = ({ children, footnotesTitleId }) => {
+  const [footnotes, setFootnotes] = useState(new Map());
+
+  const getBaseId = useCallback(
+    ({ id, children }) => id || getIdFromTree(children),
+    []
+  );
+
+  const getFootnoteRefId = useCallback(
+    (props) => getBaseId(props) + '-ref',
+    [getBaseId]
+  );
+
+  const getFootnoteId = useCallback(
+    (props) => getBaseId(props) + 'note',
+    [getBaseId]
+  );
+
+  useEffect(() => setFootnotes(new Map()), []);
+
+  const register = useCallback((footnote) => {
+    setFootnotes((footnotes) => {
+      const clone = new Map(footnotes);
+      if (!clone.has(footnote.idRef))
+        clone.set(footnote.idRef, footnote);
+      return clone;
+    });
+
+    // Return a function that unregisters the footnote.
+    // Registers on mount, unregisters on unmount
+    return () => {
+      setFootnotes((footnotes) => {
+        const clone = new Map(footnotes);
+        clone.delete(footnote.idRef);
+        return clone;
+      });
+    };
+  }, []);
+
+  return (
+    <FootnotesContext.Provider
+      value={{
+        footnotes,
+        footnotesTitleId,
+        getFootnetRefId,
+        getFootnoteId,
+        register,
+      }}
+    >
+      {children}
+    </FootnotesContext.Provider>
+  );
+};

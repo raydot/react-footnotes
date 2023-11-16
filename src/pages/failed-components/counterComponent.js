@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useCounter } from './counterContext'
+import { useCounter } from '../failed-components/counterContext'
 
 const CounterComponent = () => {
     const { count, increment } = useCounter();
